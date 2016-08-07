@@ -1,5 +1,6 @@
 package layers
 
+import "fmt"
 import "math"
 
 // SoftmaxLossLayer is layer of Softmax loss.
@@ -24,6 +25,7 @@ func (s *SoftmaxLossLayer) Forward(input [][][]float32) ([][][]float32, error) {
 			}
 		}
 	}
+	fmt.Println(total)
 
 	for i := range input {
 		for j := range input[i] {

@@ -23,7 +23,7 @@ func NewReLULayer(name, t string, slope float32) *ReLULayer {
 func (r *ReLULayer) Forward(input [][][]float32) ([][][]float32, error) {
 	for i := range input {
 		target := mat.NewMatrix(input[i])
-		target.BroadcastFunc(func(v float32, a ...interface{}) float32 {
+		target = target.BroadcastFunc(func(v float32, a ...interface{}) float32 {
 			return float32(math.Max(0, float64(v)))
 		})
 		input[i] = target.M

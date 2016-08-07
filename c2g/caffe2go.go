@@ -97,9 +97,9 @@ func im2vec(img image.Image) [][][]float32 {
 		}
 		for x := 0; x < width; x++ {
 			r, g, b, _ := img.At(x, y).RGBA()
-			res[0][y][x] = float32(r) / 255.0
-			res[1][y][x] = float32(g) / 255.0
-			res[2][y][x] = float32(b) / 255.0
+			res[0][y][x] = float32(r) / 65025
+			res[1][y][x] = float32(g) / 65025
+			res[2][y][x] = float32(b) / 65025
 		}
 	}
 	return res

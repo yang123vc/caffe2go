@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+
 	"github.com/Rompei/caffe2go/layers"
 )
 
@@ -20,9 +21,17 @@ func (n *Network) Predict(input [][][]float32) (output [][][]float32, err error)
 	for i := range n.layers {
 		fmt.Println(n.layers[i].GetName())
 		fmt.Println(len(input), len(input[0]))
-		if input, err = n.layers[i].Forward(input); err != nil {
+		input, err = n.layers[i].Forward(input)
+		if err != nil {
 			return
 		}
+		/*
+			if i == 14 {
+				fmt.Println(input)
+				fmt.Println(n.layers[i].GetName())
+				os.Exit(0)
+			}
+		*/
 	}
 	output = input
 	return

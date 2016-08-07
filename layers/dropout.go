@@ -2,6 +2,7 @@ package layers
 
 import (
 	"math/rand"
+	"time"
 )
 
 // DropoutLayer is layer of Dropout.
@@ -20,6 +21,7 @@ func NewDropoutLayer(name, t string, ratio float32) *DropoutLayer {
 
 // Forward fowards a step.
 func (d *DropoutLayer) Forward(input [][][]float32) ([][][]float32, error) {
+	rand.Seed(time.Now().UnixNano())
 	for i := range input {
 		for j := range input[i] {
 			for k := range input[i][j] {

@@ -1,9 +1,7 @@
 package layers
 
 import (
-	"fmt"
 	"github.com/Rompei/mat"
-	"os"
 )
 
 // ConvolutionLayer is layer of Convolution.
@@ -16,10 +14,11 @@ type ConvolutionLayer struct {
 	Padding    uint32
 	Weights    [][][][]float32
 	Bias       []float32
+	BiasTerm   bool
 }
 
 // NewConvolutionLayer is constructor.
-func NewConvolutionLayer(name, t string, nInput, nOutput, kernelSize, stride, padding uint32) *ConvolutionLayer {
+func NewConvolutionLayer(name, t string, nInput, nOutput, kernelSize, stride, padding uint32, biasTerm bool) *ConvolutionLayer {
 	w := make([][][][]float32, nOutput)
 	for i := 0; i < int(nOutput); i++ {
 		w[i] = make([][][]float32, nInput)
@@ -38,6 +37,7 @@ func NewConvolutionLayer(name, t string, nInput, nOutput, kernelSize, stride, pa
 		Stride:     stride,
 		Padding:    padding,
 		Weights:    w,
+		BiasTerm:   biasTerm,
 	}
 }
 
@@ -82,10 +82,7 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 			output[i][j] = make([]float32, cols)
 		}
 	}
-	out, err = out.Reshape(out.Cols, out.Rows)
-	if err != nil {
-		return nil, err
-	}
+	out = out.T()
 	for i := range out.M {
 		part := make([][]float32, 1)
 		part[0] = out.M[i]
@@ -96,8 +93,11 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 		output[i] = res.M
 	}
 
-	fmt.Println(output)
-	os.Exit(0)
+	if conv.BiasTerm {
+		for i := range output {
+			output[i] = mat.NewMatrix(output[i]).BroadcastAdd(conv.Bias[i]).M
+		}
+	}
 
 	return output, nil
 }

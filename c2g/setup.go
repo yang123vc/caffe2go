@@ -22,7 +22,9 @@ func SetupConvolution(layer LayerParameter) *layers.ConvolutionLayer {
 	nOut := uint32(num)
 	fmt.Println("nOutput: ", nOut)
 	fmt.Println("Group: ", param.GetGroup())
-	convLayer := layers.NewConvolutionLayer(layer.GetName(), layers.Convolution, nIn, nOut, kernelSize, stride, pad)
+	biasTerm := param.GetBiasTerm()
+	fmt.Println("BiasTerm: ", biasTerm)
+	convLayer := layers.NewConvolutionLayer(layer.GetName(), layers.Convolution, nIn, nOut, kernelSize, stride, pad, biasTerm)
 	idx := 0
 	// Calculate kernelsize
 	for i := 0; i < int(nOut); i++ {
@@ -35,8 +37,29 @@ func SetupConvolution(layer LayerParameter) *layers.ConvolutionLayer {
 			}
 		}
 	}
-	convLayer.Bias = blobs[1].GetData()
+	if biasTerm {
+		convLayer.Bias = blobs[1].GetData()
+	}
 	return convLayer
+}
+
+// SetupFullConnext setups FullConnectLayer.
+func SetupFullConnext(layer LayerParameter) *layers.FullConnectLayer {
+	param := layer.GetInnerProductParam()
+	blobs := layer.GetBlobs()
+	width := blobs[0].GetWidth()
+	fmt.Println("Width: ", width)
+	height := blobs[0].GetHeight()
+	fmt.Println("Height: ", height)
+	biasTerm := param.GetBiasTerm()
+	fmt.Println("BiasTerm: ", biasTerm)
+	fcLayer := layers.NewFullConnetLayer(layer.GetName(), layers.FullConnect, width, height, biasTerm)
+	fcLayer.Weights = blobs[0].GetData()
+	if biasTerm {
+		fcLayer.Bias = blobs[1].GetData()
+	}
+
+	return fcLayer
 }
 
 // SetupPooling setups PoolingLayer from caffe model.
