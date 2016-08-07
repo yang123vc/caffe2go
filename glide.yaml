@@ -1,5 +1,6 @@
 package: github.com/Rompei/caffe2go
 import:
+- package: github.com/Rompei/mat
 - package: github.com/golang/protobuf
   subpackages:
   - proto

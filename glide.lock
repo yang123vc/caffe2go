@@ -1,8 +1,10 @@
-hash: 26f80a0b5f98a2df35c8ba86df8c77b89cc6fba1331280b22867186b8c43ffc0
-updated: 2016-08-06T19:07:23.905014105+09:00
+hash: 4d056324338caa8ef5cd35d443e0b1857421ea0f17b8c05598d98aec837c2853
+updated: 2016-08-07T09:46:39.964527623+09:00
 imports:
 - name: github.com/golang/protobuf
   version: c3cefd437628a0b7d31b34fe44b3a7a540e98527
   subpackages:
   - proto
+- name: github.com/Rompei/mat
+  version: cd287ef9619ac00ca26401fd7554475c67f07f4a
 testImports: []

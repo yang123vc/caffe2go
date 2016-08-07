@@ -1,6 +1,7 @@
 package layers
 
 const (
+	Data        = "DATA"
 	Convolution = "CONVOLUTION"
 	Pooling     = "POOLING"
 	ReLU        = "RELU"
@@ -12,5 +13,5 @@ const (
 type Layer interface {
 	GetName() string
 	GetType() string
-	Forward([][][]float32) [][][]float32
+	Forward([][][]float32) ([][][]float32, error)
 }
