@@ -4,3 +4,4 @@ import:
 - package: github.com/golang/protobuf
   subpackages:
   - proto
+- package: github.com/nfnt/resize

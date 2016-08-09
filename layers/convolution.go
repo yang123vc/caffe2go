@@ -1,8 +1,6 @@
 package layers
 
-import (
-	"github.com/Rompei/mat"
-)
+import "github.com/Rompei/mat"
 
 // ConvolutionLayer is layer of Convolution.
 type ConvolutionLayer struct {

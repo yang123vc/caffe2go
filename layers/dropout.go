@@ -1,9 +1,6 @@
 package layers
 
-import (
-	"math/rand"
-	"time"
-)
+import "github.com/Rompei/mat"
 
 // DropoutLayer is layer of Dropout.
 type DropoutLayer struct {
@@ -21,15 +18,10 @@ func NewDropoutLayer(name, t string, ratio float32) *DropoutLayer {
 
 // Forward fowards a step.
 func (d *DropoutLayer) Forward(input [][][]float32) ([][][]float32, error) {
-	rand.Seed(time.Now().UnixNano())
 	for i := range input {
-		for j := range input[i] {
-			for k := range input[i][j] {
-				if rand.Float32() < d.Ratio {
-					input[i][j][k] = 0
-				}
-			}
-		}
+		t := mat.NewMatrix(input[i])
+		res := t.BroadcastMul(d.Ratio)
+		input[i] = res.M
 	}
 	return input, nil
 }

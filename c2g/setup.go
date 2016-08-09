@@ -43,8 +43,8 @@ func SetupConvolution(layer LayerParameter) *layers.ConvolutionLayer {
 	return convLayer
 }
 
-// SetupFullConnext setups FullConnectLayer.
-func SetupFullConnext(layer LayerParameter) *layers.FullConnectLayer {
+// SetupFullconnect setups FullConnectLayer.
+func SetupFullconnect(layer LayerParameter) *layers.FullconnectLayer {
 	param := layer.GetInnerProductParam()
 	blobs := layer.GetBlobs()
 	width := blobs[0].GetWidth()
@@ -53,8 +53,12 @@ func SetupFullConnext(layer LayerParameter) *layers.FullConnectLayer {
 	fmt.Println("Height: ", height)
 	biasTerm := param.GetBiasTerm()
 	fmt.Println("BiasTerm: ", biasTerm)
-	fcLayer := layers.NewFullConnetLayer(layer.GetName(), layers.FullConnect, width, height, biasTerm)
-	fcLayer.Weights = blobs[0].GetData()
+	fcLayer := layers.NewFullconnectLayer(layer.GetName(), layers.Fullconnect, width, height, biasTerm)
+	weights := blobs[0].GetData()
+	for i := 0; i < len(weights)/int(width); i++ {
+		fcLayer.Weights[i] = weights[i*int(width) : i*int(width)+int(width)]
+	}
+	fmt.Println(len(fcLayer.Weights))
 	if biasTerm {
 		fcLayer.Bias = blobs[1].GetData()
 	}
@@ -80,6 +84,15 @@ func SetupDropout(layer LayerParameter) *layers.DropoutLayer {
 	ratio := param.GetDropoutRatio()
 	fmt.Println(ratio)
 	return layers.NewDropoutLayer(layer.GetName(), layers.Dropout, ratio)
+}
+
+// SetupReLU setups ReLULayer from caffe model.
+func SetupReLU(layer LayerParameter) *layers.ReLULayer {
+	param := layer.GetReluParam()
+	slope := param.GetNegativeSlope()
+	fmt.Println("Slope: ", slope)
+	reluLayer := layers.NewReLULayer(layer.GetName(), layers.ReLU, slope)
+	return reluLayer
 }
 
 // SetupSoftmaxLoss setups SoftmaxLossLayer from caffe model.

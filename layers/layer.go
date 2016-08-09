@@ -3,7 +3,7 @@ package layers
 const (
 	Data        = "DATA"
 	Convolution = "CONVOLUTION"
-	FullConnect = "FULLCONNECT"
+	Fullconnect = "FULLCONNECT"
 	Pooling     = "POOLING"
 	ReLU        = "RELU"
 	Dropout     = "DROPOUT"

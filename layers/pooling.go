@@ -1,6 +1,8 @@
 package layers
 
-import "github.com/Rompei/mat"
+import (
+	"github.com/Rompei/mat"
+)
 
 // PoolingLayer is layer of Pooling.
 type PoolingLayer struct {
