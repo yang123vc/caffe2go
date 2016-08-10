@@ -152,37 +152,14 @@ func im2vec(img image.Image, means []float32) [][][]float32 {
 	width := bounds.Max.X
 	height := bounds.Max.Y
 	var res [][][]float32
-	switch img.ColorModel() {
-	case color.GrayModel:
-		fmt.Println("GrayModel")
+	if img.ColorModel() == color.GrayModel {
 		res = make([][][]float32, 1)
 		res[0] = make([][]float32, height)
-	case color.RGBAModel:
-		fmt.Println("RGBAModel")
+	} else {
 		res = make([][][]float32, 3)
 		for i := 0; i < 3; i++ {
 			res[i] = make([][]float32, height)
 		}
-	case color.RGBA64Model:
-		fmt.Println("RGBA64Model")
-		res = make([][][]float32, 3)
-		for i := 0; i < 3; i++ {
-			res[i] = make([][]float32, height)
-		}
-	case color.NRGBAModel:
-		fmt.Println("NRGBAModel")
-	case color.NRGBA64Model:
-		fmt.Println("NRGBA64Model")
-	case color.AlphaModel:
-		fmt.Println("AlphaModel")
-		res = make([][][]float32, 3)
-		for i := 0; i < 3; i++ {
-			res[i] = make([][]float32, height)
-		}
-	case color.Alpha16Model:
-		fmt.Println("Alpha16Model")
-	default:
-		fmt.Println(img.ColorModel())
 	}
 	for y := 0; y < height; y++ {
 		for i := 0; i < len(res); i++ {
@@ -190,15 +167,14 @@ func im2vec(img image.Image, means []float32) [][][]float32 {
 		}
 		for x := 0; x < width; x++ {
 			c := img.At(x, y)
-			switch img.ColorModel() {
-			case color.GrayModel:
+			if img.ColorModel() == color.GrayModel {
 				grayColor := img.ColorModel().Convert(c)
 				if means != nil {
 					res[0][y][x] = float32(grayColor.(color.Gray).Y) - means[0]
 				} else {
 					res[0][y][x] = float32(grayColor.(color.Gray).Y)
 				}
-			case color.RGBAModel:
+			} else {
 				r, g, b, _ := c.RGBA()
 				if means != nil {
 					res[0][y][x] = (float32(r)/255 - means[0])
@@ -209,7 +185,6 @@ func im2vec(img image.Image, means []float32) [][][]float32 {
 					res[1][y][x] = (float32(g) / 255)
 					res[2][y][x] = (float32(b) / 255)
 				}
-
 			}
 		}
 	}

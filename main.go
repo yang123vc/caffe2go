@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
 	"io/ioutil"
 	"log"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -16,11 +18,15 @@ import (
 )
 
 func loadMeans(meanFile string) ([]float32, error) {
-	b, err := ioutil.ReadFile(meanFile)
+	b, err := os.Open(meanFile)
 	if err != nil {
 		return nil, err
 	}
-	means := strings.Split(string(b), ",")
+	r := csv.NewReader(b)
+	means, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
 	res := make([]float32, len(means))
 	for i := range means {
 		out, err := strconv.ParseFloat(means[i], 32)
