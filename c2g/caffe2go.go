@@ -127,7 +127,7 @@ func NewCaffe2Go(modelPath string) (*Caffe2Go, error) {
 }
 
 // Predict start network.
-func (c2g *Caffe2Go) Predict(imagePath string, size uint) ([][][]float32, error) {
+func (c2g *Caffe2Go) Predict(imagePath string, size uint, means []float32) ([][][]float32, error) {
 	reader, err := os.Open(imagePath)
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (c2g *Caffe2Go) Predict(imagePath string, size uint) ([][][]float32, error)
 		return nil, err
 	}
 	img = resize.Resize(size, size, img, resize.Lanczos3)
-	input := im2vec(img)
+	input := im2vec(img, means)
 	//input, err = crop(input, 224)
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func (c2g *Caffe2Go) Predict(imagePath string, size uint) ([][][]float32, error)
 	return c2g.Network.Predict(input)
 }
 
-func im2vec(img image.Image) [][][]float32 {
+func im2vec(img image.Image, means []float32) [][][]float32 {
 	bounds := img.Bounds()
 	width := bounds.Max.X
 	height := bounds.Max.Y
@@ -193,12 +193,22 @@ func im2vec(img image.Image) [][][]float32 {
 			switch img.ColorModel() {
 			case color.GrayModel:
 				grayColor := img.ColorModel().Convert(c)
-				res[0][y][x] = float32(grayColor.(color.Gray).Y)
+				if means != nil {
+					res[0][y][x] = float32(grayColor.(color.Gray).Y) - means[0]
+				} else {
+					res[0][y][x] = float32(grayColor.(color.Gray).Y)
+				}
 			case color.RGBAModel:
 				r, g, b, _ := c.RGBA()
-				res[0][y][x] = (float32(r)/255 - 103.939)
-				res[1][y][x] = (float32(g)/255 - 116.779)
-				res[2][y][x] = (float32(b)/255 - 123.68)
+				if means != nil {
+					res[0][y][x] = (float32(r)/255 - means[0])
+					res[1][y][x] = (float32(g)/255 - means[1])
+					res[2][y][x] = (float32(b)/255 - means[2])
+				} else {
+					res[0][y][x] = (float32(r) / 255)
+					res[1][y][x] = (float32(g) / 255)
+					res[2][y][x] = (float32(b) / 255)
+				}
 
 			}
 		}

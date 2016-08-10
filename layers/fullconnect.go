@@ -43,9 +43,7 @@ func (f *FullconnectLayer) Forward(input [][][]float32) ([][][]float32, error) {
 		}
 	}
 	inMat := mat.NewMatrix(in)
-	fmt.Println(inMat.Rows, inMat.Cols)
 	weights := mat.NewMatrix(f.Weights)
-	fmt.Println(weights.Rows, weights.Cols)
 	out, err := mat.Mul(weights, inMat)
 	if err != nil {
 		return nil, err

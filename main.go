@@ -8,10 +8,28 @@ import (
 	"io/ioutil"
 	"log"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/Rompei/caffe2go/c2g"
 )
+
+func loadMeans(meanFile string) ([]float32, error) {
+	b, err := ioutil.ReadFile(meanFile)
+	if err != nil {
+		return nil, err
+	}
+	means := strings.Split(string(b), ",")
+	res := make([]float32, len(means))
+	for i := range means {
+		out, err := strconv.ParseFloat(means[i], 32)
+		if err != nil {
+			return nil, err
+		}
+		res[i] = float32(out)
+	}
+	return res, nil
+}
 
 func main() {
 
@@ -22,11 +40,13 @@ func main() {
 		imagePath string
 		labelPath string
 		shape     uint
+		meanFile  string
 	)
 
 	flag.StringVar(&modelPath, "m", "", "Path for caffemodel.")
 	flag.StringVar(&imagePath, "i", "", "Path for image.")
 	flag.StringVar(&labelPath, "l", "", "Path for labels.")
+	flag.StringVar(&meanFile, "mf", "", "Meanfile path")
 	flag.UintVar(&shape, "s", 0, "Input Shape")
 	flag.Parse()
 
@@ -34,11 +54,20 @@ func main() {
 		log.Fatalln("Option is not enough.")
 	}
 
+	var means []float32
+	var err error
+	if meanFile != "" {
+		means, err = loadMeans(meanFile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
 	caffe2go, err := c2g.NewCaffe2Go(modelPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	output, err := caffe2go.Predict(imagePath, shape)
+	output, err := caffe2go.Predict(imagePath, shape, means)
 	if err != nil {
 		log.Fatalln(err)
 	}
