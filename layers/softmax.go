@@ -23,31 +23,19 @@ func (s *SoftmaxLossLayer) Forward(input [][][]float32) ([][][]float32, error) {
 
 	// Calculate maximum.
 	for i := range input {
-		for j := range input[i] {
-			for k := range input[i][j] {
-				if max < input[i][j][k] {
-					max = input[i][j][k]
-				}
-			}
+		if max < input[i][0][0] {
+			max = input[i][0][0]
 		}
 	}
 
 	// Calculate total.
 	for i := range input {
-		for j := range input[i] {
-			for k := range input[i][j] {
-				input[i][j][k] = float32(math.Exp(float64(input[i][j][k] - max)))
-				total += input[i][j][k]
-			}
-		}
+		input[i][0][0] = float32(math.Exp(float64(input[i][0][0] - max)))
+		total += input[i][0][0]
 	}
 
 	for i := range input {
-		for j := range input[i] {
-			for k := range input[i][j] {
-				input[i][j][k] = input[i][j][k] / total
-			}
-		}
+		input[i][0][0] = input[i][0][0] / total
 	}
 
 	return input, nil
