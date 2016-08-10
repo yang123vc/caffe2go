@@ -25,13 +25,6 @@ func (n *Network) Predict(input [][][]float32) (output [][][]float32, err error)
 		if err != nil {
 			return
 		}
-		/*
-			if i == 14 {
-				fmt.Println(input)
-				fmt.Println(n.layers[i].GetName())
-				os.Exit(0)
-			}
-		*/
 	}
 	output = input
 	return

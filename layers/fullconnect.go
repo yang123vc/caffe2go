@@ -1,8 +1,6 @@
 package layers
 
 import (
-	"fmt"
-
 	"github.com/Rompei/mat"
 )
 

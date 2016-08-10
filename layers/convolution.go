@@ -57,14 +57,28 @@ func (conv *ConvolutionLayer) addMatrixes(ms []*mat.Matrix) (res float32, err er
 // Forward forwards a step.
 func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error) {
 	if conv.Padding > 0 {
+		doneCh := make(chan bool, len(input))
 		for i := range input {
-			input[i] = mat.NewMatrix(input[i]).Pad(uint(conv.Padding), mat.Max).M
+			go func(i int, doneCh chan bool) {
+				input[i] = mat.NewMatrix(input[i]).Pad(uint(conv.Padding), mat.Max).M
+				doneCh <- true
+			}(i, doneCh)
+		}
+		for i := 0; i < len(input); i++ {
+			<-doneCh
 		}
 	}
 	in := mat.NewMatrix(Im2Col(input, conv.KernelSize, conv.Stride))
 	kernels := make([][]float32, conv.NOutput)
+	doneCh := make(chan bool, conv.NOutput)
 	for i := 0; i < int(conv.NOutput); i++ {
-		kernels[i] = Im2Col(conv.Weights[i], conv.KernelSize, conv.Stride)[0]
+		go func(i int, doneCh chan bool) {
+			kernels[i] = Im2Col(conv.Weights[i], conv.KernelSize, conv.Stride)[0]
+			doneCh <- true
+		}(i, doneCh)
+	}
+	for i := 0; i < int(conv.NOutput); i++ {
+		<-doneCh
 	}
 	kernelMatrix := mat.NewMatrix(kernels).T()
 	out, err := mat.Mul(in, kernelMatrix)
@@ -74,21 +88,25 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 	output := make([][][]float32, conv.NOutput)
 	rows := (len(input[0])-conv.KernelSize)/conv.Stride + 1
 	cols := (len(input[0][0])-conv.KernelSize)/conv.Stride + 1
-	for i := range output {
-		output[i] = make([][]float32, rows)
-		for j := range output[i] {
-			output[i][j] = make([]float32, cols)
-		}
-	}
 	out = out.T()
+	errCh := make(chan error, out.Rows)
 	for i := range out.M {
-		part := make([][]float32, 1)
-		part[0] = out.M[i]
-		res, err := mat.NewMatrix(part).Reshape(uint(rows), uint(cols))
-		if err != nil {
+		go func(i int, errCh chan error) {
+			part := make([][]float32, 1)
+			part[0] = out.M[i]
+			res, err := mat.NewMatrix(part).Reshape(uint(rows), uint(cols))
+			if err != nil {
+				errCh <- err
+				return
+			}
+			output[i] = res.M
+			errCh <- nil
+		}(i, errCh)
+	}
+	for range out.M {
+		if err := <-errCh; err != nil {
 			return nil, err
 		}
-		output[i] = res.M
 	}
 
 	if conv.BiasTerm {

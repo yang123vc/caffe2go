@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Rompei/caffe2go/c2g"
 )
@@ -67,10 +68,12 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	start := time.Now()
 	output, err := caffe2go.Predict(imagePath, shape, means)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Printf("Done in %fs\n", time.Now().Sub(start).Seconds())
 
 	if labelPath != "" {
 		result := make([]float32, len(output))
