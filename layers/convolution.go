@@ -7,16 +7,16 @@ type ConvolutionLayer struct {
 	*BaseLayer
 	NInput     uint32
 	NOutput    uint32
-	KernelSize uint32
-	Stride     uint32
-	Padding    uint32
+	KernelSize int
+	Stride     int
+	Padding    int
 	Weights    [][][][]float32
 	Bias       []float32
 	BiasTerm   bool
 }
 
 // NewConvolutionLayer is constructor.
-func NewConvolutionLayer(name, t string, nInput, nOutput, kernelSize, stride, padding uint32, biasTerm bool) *ConvolutionLayer {
+func NewConvolutionLayer(name, t string, nInput, nOutput uint32, kernelSize, stride, padding int, biasTerm bool) *ConvolutionLayer {
 	w := make([][][][]float32, nOutput)
 	for i := 0; i < int(nOutput); i++ {
 		w[i] = make([][][]float32, nInput)
@@ -61,10 +61,10 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 			input[i] = mat.NewMatrix(input[i]).Pad(uint(conv.Padding), mat.Max).M
 		}
 	}
-	in := mat.NewMatrix(Im2Col(input, int(conv.KernelSize), int(conv.Stride)))
+	in := mat.NewMatrix(Im2Col(input, conv.KernelSize, conv.Stride))
 	kernels := make([][]float32, conv.NOutput)
 	for i := 0; i < int(conv.NOutput); i++ {
-		kernels[i] = Im2Col(conv.Weights[i], int(conv.KernelSize), int(conv.Stride))[0]
+		kernels[i] = Im2Col(conv.Weights[i], conv.KernelSize, conv.Stride)[0]
 	}
 	kernelMatrix := mat.NewMatrix(kernels).T()
 	out, err := mat.Mul(in, kernelMatrix)
@@ -72,8 +72,8 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 		return nil, err
 	}
 	output := make([][][]float32, conv.NOutput)
-	rows := (len(input[0])-int(conv.KernelSize))/int(conv.Stride) + 1
-	cols := (len(input[0][0])-int(conv.KernelSize))/int(conv.Stride) + 1
+	rows := (len(input[0])-conv.KernelSize)/conv.Stride + 1
+	cols := (len(input[0][0])-conv.KernelSize)/conv.Stride + 1
 	for i := range output {
 		output[i] = make([][]float32, rows)
 		for j := range output[i] {

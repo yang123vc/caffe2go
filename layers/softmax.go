@@ -1,7 +1,6 @@
 package layers
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -19,7 +18,6 @@ func NewSoftmaxLossLayer(name, t string) *SoftmaxLossLayer {
 
 // Forward forwards a step.
 func (s *SoftmaxLossLayer) Forward(input [][][]float32) ([][][]float32, error) {
-	fmt.Println(input)
 	total := float32(0.0)
 	max := float32(0.0)
 

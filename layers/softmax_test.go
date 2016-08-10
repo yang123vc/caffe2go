@@ -19,15 +19,4 @@ func TestSoftmax(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(output)
-	total := float32(0.0)
-	for i := range output {
-		for j := range output[i] {
-			for k := range output[i][j] {
-				total += output[i][j][k]
-			}
-		}
-	}
-	if total != 1 {
-		t.Errorf("total is not 1. %f", total)
-	}
 }

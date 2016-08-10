@@ -7,13 +7,13 @@ import (
 // PoolingLayer is layer of Pooling.
 type PoolingLayer struct {
 	*BaseLayer
-	KernelSize uint32
-	Stride     uint32
-	Padding    uint32
+	KernelSize int
+	Stride     int
+	Padding    int
 }
 
 // NewPoolingLayer is constructor.
-func NewPoolingLayer(name, t string, kernelSize, stride, padding uint32) *PoolingLayer {
+func NewPoolingLayer(name, t string, kernelSize, stride, padding int) *PoolingLayer {
 	return &PoolingLayer{
 		BaseLayer:  NewBaseLayer(name, t),
 		KernelSize: kernelSize,

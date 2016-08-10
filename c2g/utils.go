@@ -17,9 +17,3 @@ func showLayers(layers []*caffe.LayerParameter) {
 		fmt.Println(layers[i].GetType())
 	}
 }
-func getChannels(blob Blob) int64 {
-	if blob.GetChannels() > 0 {
-		return int64(blob.GetChannels())
-	}
-	return blob.GetShape().GetDim()[1]
-}

@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/Rompei/caffe2go/caffe"
+	"github.com/Rompei/caffe2go/layers"
 	"github.com/Rompei/caffe2go/network"
 	"github.com/golang/protobuf/proto"
 	"github.com/nfnt/resize"
@@ -20,7 +22,7 @@ type Caffe2Go struct {
 }
 
 // NewCaffe2Go is constructor.
-func NewCaffe2Go(modelPath string) *Caffe2Go {
+func NewCaffe2Go(modelPath string) (*Caffe2Go, error) {
 	data, err := ioutil.ReadFile(modelPath)
 	if err != nil {
 		log.Fatalln(err)
@@ -31,44 +33,89 @@ func NewCaffe2Go(modelPath string) *Caffe2Go {
 	}
 	var net network.Network
 	if len(netParameter.GetLayer()) != 0 {
-		// TODO: implement
+		showLayers(netParameter.GetLayer())
+		for i := range netParameter.GetLayer() {
+			switch netParameter.GetLayer()[i].GetType() {
+			case layers.InnerProduct:
+				fmt.Println(layers.InnerProduct)
+				fcLayer, err := SetupFullconnect(netParameter.GetLayer()[i])
+				if err != nil {
+					return nil, err
+				}
+				net.Add(fcLayer)
+				fmt.Println()
+			case layers.Convolution:
+				fmt.Println(layers.Convolution)
+				convLayer := SetupConvolution(netParameter.GetLayer()[i])
+				net.Add(convLayer)
+				fmt.Println()
+			case layers.Pooling:
+				fmt.Println(layers.Pooling)
+				poolLayer := SetupPooling(netParameter.GetLayer()[i])
+				net.Add(poolLayer)
+				fmt.Println()
+			case layers.Dropout:
+				fmt.Println(layers.Dropout)
+				dropoutLayer := SetupDropout(netParameter.GetLayer()[i])
+				net.Add(dropoutLayer)
+				fmt.Println()
+			case layers.Softmax:
+				fmt.Println(caffe.V1LayerParameter_SOFTMAX)
+				softMaxLayer := SetupSoftmaxLoss(netParameter.GetLayer()[i])
+				net.Add(softMaxLayer)
+				fmt.Println()
+			case layers.ReLU:
+				fmt.Println(layers.ReLU)
+				reluLayer := SetupReLU(netParameter.GetLayer()[i])
+				net.Add(reluLayer)
+				fmt.Println()
+			case layers.SoftmaxWithLoss:
+				fmt.Println(layers.SoftmaxWithLoss)
+				softmaxLossLayer := SetupSoftmaxLoss(netParameter.GetLayer()[i])
+				net.Add(softmaxLossLayer)
+				fmt.Println()
+			}
+		}
 	} else {
 		showV1Layers(netParameter.GetLayers())
 		for i := range netParameter.GetLayers() {
-			switch netParameter.Layers[i].GetType() {
+			switch netParameter.GetLayers()[i].GetType() {
 			case caffe.V1LayerParameter_INNER_PRODUCT:
 				fmt.Println(caffe.V1LayerParameter_INNER_PRODUCT)
-				fcLayer := SetupFullconnect(netParameter.Layers[i])
+				fcLayer, err := SetupFullconnect(netParameter.GetLayers()[i])
+				if err != nil {
+					return nil, err
+				}
 				net.Add(fcLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_CONVOLUTION:
 				fmt.Println(caffe.V1LayerParameter_CONVOLUTION)
-				convLayer := SetupConvolution(netParameter.Layers[i])
+				convLayer := SetupConvolution(netParameter.GetLayers()[i])
 				net.Add(convLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_POOLING:
 				fmt.Println(caffe.V1LayerParameter_POOLING)
-				poolLayer := SetupPooling(netParameter.Layers[i])
+				poolLayer := SetupPooling(netParameter.GetLayers()[i])
 				net.Add(poolLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_DROPOUT:
 				fmt.Println(caffe.V1LayerParameter_DROPOUT)
-				dropoutLayer := SetupDropout(netParameter.Layers[i])
+				dropoutLayer := SetupDropout(netParameter.GetLayers()[i])
 				net.Add(dropoutLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_SOFTMAX:
 				fmt.Println(caffe.V1LayerParameter_SOFTMAX)
-				softMaxLayer := SetupSoftmaxLoss(netParameter.Layers[i])
+				softMaxLayer := SetupSoftmaxLoss(netParameter.GetLayers()[i])
 				net.Add(softMaxLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_RELU:
 				fmt.Println(caffe.V1LayerParameter_RELU)
-				reluLayer := SetupReLU(netParameter.Layers[i])
+				reluLayer := SetupReLU(netParameter.GetLayers()[i])
 				net.Add(reluLayer)
 				fmt.Println()
 			case caffe.V1LayerParameter_SOFTMAX_LOSS:
 				fmt.Println(caffe.V1LayerParameter_SOFTMAX_LOSS)
-				softmaxLossLayer := SetupSoftmaxLoss(netParameter.Layers[i])
+				softmaxLossLayer := SetupSoftmaxLoss(netParameter.GetLayers()[i])
 				net.Add(softmaxLossLayer)
 				fmt.Println()
 			}
@@ -76,11 +123,11 @@ func NewCaffe2Go(modelPath string) *Caffe2Go {
 	}
 	return &Caffe2Go{
 		Network: &net,
-	}
+	}, nil
 }
 
 // Predict start network.
-func (c2g *Caffe2Go) Predict(imagePath string) ([][][]float32, error) {
+func (c2g *Caffe2Go) Predict(imagePath string, size uint) ([][][]float32, error) {
 	reader, err := os.Open(imagePath)
 	if err != nil {
 		return nil, err
@@ -91,7 +138,7 @@ func (c2g *Caffe2Go) Predict(imagePath string) ([][][]float32, error) {
 	if err != nil {
 		return nil, err
 	}
-	img = resize.Resize(224, 224, img, resize.Lanczos3)
+	img = resize.Resize(size, size, img, resize.Lanczos3)
 	input := im2vec(img)
 	//input, err = crop(input, 224)
 	if err != nil {
@@ -104,19 +151,56 @@ func im2vec(img image.Image) [][][]float32 {
 	bounds := img.Bounds()
 	width := bounds.Max.X
 	height := bounds.Max.Y
-	res := make([][][]float32, 3)
-	for i := 0; i < 3; i++ {
-		res[i] = make([][]float32, height)
+	var res [][][]float32
+	switch img.ColorModel() {
+	case color.GrayModel:
+		fmt.Println("GrayModel")
+		res = make([][][]float32, 1)
+		res[0] = make([][]float32, height)
+	case color.RGBAModel:
+		fmt.Println("RGBAModel")
+		res = make([][][]float32, 3)
+		for i := 0; i < 3; i++ {
+			res[i] = make([][]float32, height)
+		}
+	case color.RGBA64Model:
+		fmt.Println("RGBA64Model")
+		res = make([][][]float32, 3)
+		for i := 0; i < 3; i++ {
+			res[i] = make([][]float32, height)
+		}
+	case color.NRGBAModel:
+		fmt.Println("NRGBAModel")
+	case color.NRGBA64Model:
+		fmt.Println("NRGBA64Model")
+	case color.AlphaModel:
+		fmt.Println("AlphaModel")
+		res = make([][][]float32, 3)
+		for i := 0; i < 3; i++ {
+			res[i] = make([][]float32, height)
+		}
+	case color.Alpha16Model:
+		fmt.Println("Alpha16Model")
+	default:
+		fmt.Println(img.ColorModel())
 	}
 	for y := 0; y < height; y++ {
-		for i := 0; i < 3; i++ {
+		for i := 0; i < len(res); i++ {
 			res[i][y] = make([]float32, width)
 		}
 		for x := 0; x < width; x++ {
-			r, g, b, _ := img.At(x, y).RGBA()
-			res[0][y][x] = (float32(r)/255 - 103.939)
-			res[1][y][x] = (float32(g)/255 - 116.779)
-			res[2][y][x] = (float32(b)/255 - 123.68)
+			c := img.At(x, y)
+			switch img.ColorModel() {
+			case color.GrayModel:
+				grayColor := img.ColorModel().Convert(c)
+				res[0][y][x] = float32(grayColor.(color.Gray).Y)
+			case color.RGBAModel:
+				r, g, b, _ := c.RGBA()
+				res[0][y][x] = (float32(r)/255 - 103.939)
+				res[1][y][x] = (float32(g)/255 - 116.779)
+				res[2][y][x] = (float32(b)/255 - 123.68)
+
+			}
 		}
 	}
 	return res

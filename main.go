@@ -21,23 +21,27 @@ func main() {
 		modelPath string
 		imagePath string
 		labelPath string
+		shape     uint
 	)
 
 	flag.StringVar(&modelPath, "m", "", "Path for caffemodel.")
 	flag.StringVar(&imagePath, "i", "", "Path for image.")
 	flag.StringVar(&labelPath, "l", "", "Path for labels.")
+	flag.UintVar(&shape, "s", 0, "Input Shape")
 	flag.Parse()
 
-	if modelPath == "" || imagePath == "" {
+	if modelPath == "" || imagePath == "" || shape == 0 {
 		log.Fatalln("Option is not enough.")
 	}
 
-	caffe2go := c2g.NewCaffe2Go(modelPath)
-	output, err := caffe2go.Predict(imagePath)
+	caffe2go, err := c2g.NewCaffe2Go(modelPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(output)
+	output, err := caffe2go.Predict(imagePath, shape)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	if labelPath != "" {
 		result := make([]float32, len(output))

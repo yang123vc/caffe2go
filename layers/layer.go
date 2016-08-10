@@ -1,13 +1,14 @@
 package layers
 
 const (
-	Data        = "DATA"
-	Convolution = "CONVOLUTION"
-	Fullconnect = "FULLCONNECT"
-	Pooling     = "POOLING"
-	ReLU        = "RELU"
-	Dropout     = "DROPOUT"
-	SoftmaxLoss = "SOFTMAX_LOSS"
+	Data            = "Data"
+	Convolution     = "Convolution"
+	InnerProduct    = "InnerProduct"
+	Pooling         = "Pooling"
+	ReLU            = "ReLU"
+	Dropout         = "Dropout"
+	SoftmaxWithLoss = "SoftmaxWithLoss"
+	Softmax         = "Softmax"
 )
 
 // Layer is object of network layer.
