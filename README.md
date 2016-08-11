@@ -6,13 +6,13 @@ Caffe2Go evaluate caffemodel with Golang
 
 Command line interface
 
-'''
+```
 ./caffe2go -i images/plane.jpg -m models/nin\_imagenet.caffemodel -l labels/synset\_words.txt -s 224 -mf means.txt
-'''
+```
 
 Options
 
-'''
+```
 Usage of ./caffe2go:
 -i string
 Path for image.
@@ -25,11 +25,11 @@ Meanfile path
 -s uint
 Input Shape
 
-'''
+```
 
 Use the library on your own software
 
-'''go
+```go
 package main
 
 import (
@@ -54,20 +54,20 @@ func main() {
 		fmt.Printf("%d: %f\n", i, output[i][0][0])
 	}
 }
-'''
+```
 
 ## Supported layers
 
 Now supports the layers below
 
-'''
+```
 Convolution
 Pooling
 ReLU
 FullyConnected
 Dropout
 Softmax
-'''
+```
 
 ## License
 
