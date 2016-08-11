@@ -11,6 +11,7 @@ Command line interface
 '''
 
 Options
+
 '''
 Usage of ./caffe2go:
 -i string
