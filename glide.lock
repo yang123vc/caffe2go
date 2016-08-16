@@ -1,10 +1,31 @@
-hash: 3914dbb38140cf334874ee899ca0a2e44edca5820f088132aa5c3668344bfa06
-updated: 2016-08-09T17:40:54.729803722+09:00
+hash: 369608d4e5b5b62330752d44547a4f074ac240d05b24ebd63538c0f410125441
+updated: 2016-08-16T14:21:06.537204946+09:00
 imports:
 - name: github.com/golang/protobuf
-  version: c3cefd437628a0b7d31b34fe44b3a7a540e98527
+  version: 2c1988e8c18d14b142c0b472624f71647cf39adb
   subpackages:
   - proto
+- name: github.com/gonum/blas
+  version: aba9649bffd550ef7ff0d3ab9d92d4d0748233b1
+  subpackages:
+  - blas64
+  - native
+  - native/internal/math32
+- name: github.com/gonum/floats
+  version: 71104dde078efa80be993024d67e847c88164dc9
+- name: github.com/gonum/internal
+  version: dce19b50b924d0835555ad5d271e0c8ef8b804f0
+  subpackages:
+  - asm
+- name: github.com/gonum/lapack
+  version: 5a10757985d7fdf9c4c3606a0157f22e2a2e51b2
+  subpackages:
+  - lapack64
+  - native
+- name: github.com/gonum/matrix
+  version: a4e29827f08e30ac988a5270fff75a598a6d3526
+  subpackages:
+  - mat64
 - name: github.com/nfnt/resize
   version: 891127d8d1b52734debe1b3c3d7e747502b6c366
 - name: github.com/Rompei/mat

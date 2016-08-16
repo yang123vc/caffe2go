@@ -1,5 +1,9 @@
 package layers
 
+import (
+	"github.com/gonum/matrix/mat64"
+)
+
 // Im2Col converts image 3D tensor to matrix.
 func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {
 	colSize := kernelSize * kernelSize * len(img)
@@ -33,4 +37,16 @@ func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {
 		<-doneCh
 	}
 	return res
+}
+
+// ConvertMatrix converts slice of vector to mat64.Matrix
+func ConvertMatrix(m [][]float32) *mat64.Dense {
+	cols := len(m[0])
+	flatten := make([]float64, len(m)*cols)
+	for i := range m {
+		for j := range m[i] {
+			flatten[cols*i+j] = float64(m[i][j])
+		}
+	}
+	return mat64.NewDense(len(m), cols, flatten)
 }

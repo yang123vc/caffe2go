@@ -57,3 +57,25 @@ func TestIm2Col(t *testing.T) {
 	}
 
 }
+
+func TestConvertMatrix(t *testing.T) {
+	src := [][]float32{
+		{1, 2, 3, 4},
+		{5, 6, 7, 8},
+		{9, 10, 11, 12},
+	}
+
+	dst := ConvertMatrix(src)
+	r, c := dst.Dims()
+	if r != len(src) || c != len(src[0]) {
+		t.Error("not same")
+	}
+
+	for i := range src {
+		for j := range src[i] {
+			if src[i][j] != float32(dst.At(i, j)) {
+				t.Error("not same")
+			}
+		}
+	}
+}
