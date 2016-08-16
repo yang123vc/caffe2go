@@ -1,6 +1,9 @@
 package layers
 
-import "github.com/Rompei/mat"
+import (
+	"github.com/Rompei/mat"
+	"github.com/gonum/matrix/mat64"
+)
 
 // ConvolutionLayer is layer of Convolution.
 type ConvolutionLayer struct {
@@ -68,7 +71,7 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 			<-doneCh
 		}
 	}
-	in := mat.NewMatrix(Im2Col(input, conv.KernelSize, conv.Stride))
+	in := ConvertMatrix(Im2Col(input, conv.KernelSize, conv.Stride))
 	kernels := make([][]float32, conv.NOutput)
 	doneCh := make(chan bool, conv.NOutput)
 	for i := 0; i < int(conv.NOutput); i++ {
@@ -80,20 +83,22 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 	for i := 0; i < int(conv.NOutput); i++ {
 		<-doneCh
 	}
-	kernelMatrix := mat.NewMatrix(kernels).T()
-	out, err := mat.Mul(in, kernelMatrix)
-	if err != nil {
-		return nil, err
-	}
+	kernelMatrix := ConvertMatrix(kernels)
+	var out mat64.Dense
+	out.Mul(in, kernelMatrix.T())
 	output := make([][][]float32, conv.NOutput)
 	rows := (len(input[0])-conv.KernelSize)/conv.Stride + 1
 	cols := (len(input[0][0])-conv.KernelSize)/conv.Stride + 1
-	out = out.T()
-	errCh := make(chan error, out.Rows)
-	for i := range out.M {
+	outTransposed := out.T()
+	r, c := outTransposed.Dims()
+	errCh := make(chan error, r)
+	for i := 0; i < r; i++ {
 		go func(i int, errCh chan error) {
 			part := make([][]float32, 1)
-			part[0] = out.M[i]
+			part[0] = make([]float32, c)
+			for j := 0; j < c; j++ {
+				part[0][j] = float32(outTransposed.At(i, j))
+			}
 			res, err := mat.NewMatrix(part).Reshape(uint(rows), uint(cols))
 			if err != nil {
 				errCh <- err
@@ -103,7 +108,7 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 			errCh <- nil
 		}(i, errCh)
 	}
-	for range out.M {
+	for i := 0; i < r; i++ {
 		if err := <-errCh; err != nil {
 			return nil, err
 		}

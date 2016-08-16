@@ -107,5 +107,4 @@ func TestConvolution(t *testing.T) {
 			}
 		}
 	}
-
 }
