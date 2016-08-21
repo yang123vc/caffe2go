@@ -1,8 +1,9 @@
 package layers
 
 import (
-	"github.com/Rompei/mat"
 	"math"
+
+	"github.com/gonum/matrix/mat64"
 )
 
 // ReLULayer is layer of ReLU.
@@ -22,11 +23,12 @@ func NewReLULayer(name, t string, slope float32) *ReLULayer {
 // Forward forwards a step.
 func (r *ReLULayer) Forward(input [][][]float32) ([][][]float32, error) {
 	for i := range input {
-		target := mat.NewMatrix(input[i])
-		target = target.BroadcastFunc(func(v float32, a ...interface{}) float32 {
-			return float32(math.Max(0, float64(v)))
-		})
-		input[i] = target.M
+		t := ConvertMatrix(input[i])
+		var out mat64.Dense
+		out.Apply(func(i, j int, v float64) float64 {
+			return math.Max(0, v)
+		}, t)
+		input[i] = ConvertMat64(&out)
 	}
 	return input, nil
 }
