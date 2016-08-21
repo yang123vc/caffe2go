@@ -6,3 +6,4 @@ import:
   - proto
 - package: github.com/nfnt/resize
 - package: github.com/gonum/matrix
+- package: github.com/Rompei/exmat
