@@ -1,8 +1,10 @@
 package layers
 
 import (
-	"github.com/Rompei/mat"
 	"testing"
+
+	"github.com/Rompei/mat"
+	"github.com/gonum/matrix/mat64"
 )
 
 func TestIm2Col(t *testing.T) {
@@ -74,6 +76,28 @@ func TestConvertMatrix(t *testing.T) {
 	for i := range src {
 		for j := range src[i] {
 			if src[i][j] != float32(dst.At(i, j)) {
+				t.Error("not same")
+			}
+		}
+	}
+}
+
+func TestConvertMat64(t *testing.T) {
+	src := mat64.NewDense(3, 4, []float64{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+	})
+	ans := [][]float32{
+		{1, 2, 3, 4},
+		{5, 6, 7, 8},
+		{9, 10, 11, 12},
+	}
+
+	res := ConvertMat64(src)
+	for i := range ans {
+		for j := range ans[i] {
+			if res[i][j] != ans[i][j] {
 				t.Error("not same")
 			}
 		}

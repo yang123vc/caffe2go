@@ -50,3 +50,16 @@ func ConvertMatrix(m [][]float32) *mat64.Dense {
 	}
 	return mat64.NewDense(len(m), cols, flatten)
 }
+
+// ConvertMat64 converts mat64 matrix to [][]float32
+func ConvertMat64(m mat64.Matrix) [][]float32 {
+	r, c := m.Dims()
+	res := make([][]float32, r)
+	for i := 0; i < r; i++ {
+		res[i] = make([]float32, c)
+		for j := 0; j < c; j++ {
+			res[i][j] = float32(m.At(i, j))
+		}
+	}
+	return res
+}
