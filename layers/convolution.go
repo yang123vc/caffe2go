@@ -42,21 +42,6 @@ func NewConvolutionLayer(name, t string, nInput, nOutput uint32, kernelSize, str
 	}
 }
 
-func (conv *ConvolutionLayer) addMatrixes(ms []*mat.Matrix) (res float32, err error) {
-	sumurise := mat.Zeros(ms[0].Rows, ms[0].Cols)
-	for i := range ms {
-		if sumurise, err = mat.Add(sumurise, ms[i]); err != nil {
-			return
-		}
-	}
-	for y := range sumurise.M {
-		for x := range sumurise.M[y] {
-			res += sumurise.M[y][x]
-		}
-	}
-	return
-}
-
 // Forward forwards a step.
 func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error) {
 	if conv.Padding > 0 {
