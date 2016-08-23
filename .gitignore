@@ -36,3 +36,4 @@ run.sh
 !*.gitkeep
 vendor
 example/example
+*.pprof

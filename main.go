@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -48,6 +49,8 @@ func main() {
 		labelPath string
 		shape     uint
 		meanFile  string
+		cpuProf   string
+		memProf   string
 	)
 
 	flag.StringVar(&modelPath, "m", "", "Path for caffemodel.")
@@ -55,6 +58,8 @@ func main() {
 	flag.StringVar(&labelPath, "l", "", "Path for labels.")
 	flag.StringVar(&meanFile, "mf", "", "Meanfile path")
 	flag.UintVar(&shape, "s", 0, "Input Shape")
+	flag.StringVar(&cpuProf, "cpuProf", "", "Filename for CPU profiling.")
+	flag.StringVar(&memProf, "memProf", "", "Filename for Memory profiling.")
 	flag.Parse()
 
 	if modelPath == "" || imagePath == "" || shape == 0 {
@@ -75,9 +80,26 @@ func main() {
 		log.Fatalln(err)
 	}
 	start := time.Now()
+	if cpuProf != "" {
+		cf, err := os.Create(cpuProf)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer cf.Close()
+		pprof.StartCPUProfile(cf)
+	}
 	output, err := caffe2go.Predict(imagePath, shape, means)
 	if err != nil {
 		log.Fatalln(err)
+	}
+	if memProf != "" {
+		pprof.StopCPUProfile()
+		mf, err := os.Create(memProf)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer mf.Close()
+		pprof.WriteHeapProfile(mf)
 	}
 	fmt.Printf("Done in %fs\n", time.Now().Sub(start).Seconds())
 
