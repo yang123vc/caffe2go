@@ -1,8 +1,6 @@
 package layers
 
-import (
-	"github.com/gonum/matrix/mat64"
-)
+import "github.com/gonum/matrix/mat64"
 
 // Im2Col converts image 3D tensor to matrix.
 func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {

@@ -9,6 +9,7 @@ const (
 	Dropout         = "Dropout"
 	SoftmaxWithLoss = "SoftmaxWithLoss"
 	Softmax         = "Softmax"
+	Lrn             = "Lrn"
 )
 
 // Layer is object of network layer.

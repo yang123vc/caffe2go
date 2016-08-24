@@ -74,6 +74,11 @@ func NewCaffe2Go(modelPath string) (*Caffe2Go, error) {
 				softmaxLossLayer := SetupSoftmaxLoss(netParameter.GetLayer()[i])
 				net.Add(softmaxLossLayer)
 				fmt.Println()
+			case layers.Lrn:
+				fmt.Println(layers.Lrn)
+				lrnLayer := SetupLRN(netParameter.GetLayer()[i])
+				net.Add(lrnLayer)
+				fmt.Println()
 			}
 		}
 	} else {
@@ -117,6 +122,11 @@ func NewCaffe2Go(modelPath string) (*Caffe2Go, error) {
 				fmt.Println(caffe.V1LayerParameter_SOFTMAX_LOSS)
 				softmaxLossLayer := SetupSoftmaxLoss(netParameter.GetLayers()[i])
 				net.Add(softmaxLossLayer)
+				fmt.Println()
+			case caffe.V1LayerParameter_LRN:
+				fmt.Println(caffe.V1LayerParameter_LRN)
+				lrnLayer := SetupLRN(netParameter.GetLayers()[i])
+				net.Add(lrnLayer)
 				fmt.Println()
 			}
 		}

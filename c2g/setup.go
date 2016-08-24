@@ -108,6 +108,20 @@ func SetupSoftmaxLoss(layer LayerParameter) *layers.SoftmaxLossLayer {
 	return layers.NewSoftmaxLossLayer(layer.GetName(), layers.SoftmaxWithLoss)
 }
 
+// SetupLRN setups LRNLayer from caffe model.
+func SetupLRN(layer LayerParameter) *layers.LRN {
+	param := layer.GetLrnParam()
+	k := param.GetK()
+	fmt.Println("k: ", k)
+	localSize := param.GetLocalSize()
+	fmt.Println("LocalSize: ", localSize)
+	alpha := param.GetAlpha()
+	fmt.Println("alpha: ", alpha)
+	beta := param.GetBeta()
+	fmt.Println("beta: ", beta)
+	return layers.NewLRNLayer(layer.GetName(), layers.Lrn, int(localSize), float64(k), float64(alpha), float64(beta))
+}
+
 func getKernelSize(param Parameter) int {
 	if kernelH := param.GetKernelH(); kernelH > 0 {
 		return int(kernelH)
