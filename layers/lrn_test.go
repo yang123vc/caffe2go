@@ -20,6 +20,9 @@ func TestLRN(t *testing.T) {
 		input[i] = m.M
 	}
 
-	res := lrn.Forward(input)
+	res, err := lrn.Forward(input)
+	if err != nil {
+		t.Error(err)
+	}
 	t.Log(res)
 }

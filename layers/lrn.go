@@ -1,7 +1,6 @@
 package layers
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/gonum/matrix/mat64"
@@ -40,10 +39,9 @@ func (lrn *LRN) Forward(input [][][]float32) ([][][]float32, error) {
 			for l := s; l < e; l++ {
 				sum += float64(input[l][i][j] * input[l][i][j])
 			}
-			return float64(lrn.K) + lrn.Alpha*sum
+			return v / (float64(lrn.K) + lrn.Alpha*sum)
 		}, o)
 		output[k] = ConvertMat64(&res)
 	}
-	fmt.Println(len(output), len(output[0]), len(output[0][0]))
 	return output, nil
 }

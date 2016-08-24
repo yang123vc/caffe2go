@@ -1,8 +1,8 @@
-hash: e6fa36a76474eb6e880ae508384c3ac627a09ab59d32033e78cedbe165387554
-updated: 2016-08-21T11:12:05.643220801+09:00
+hash: 7883ca3eb9877617c1b15c1c15e6681f7457995f6fcdf54f196ff3d4d882594e
+updated: 2016-08-24T10:14:23.810315107+09:00
 imports:
 - name: github.com/golang/protobuf
-  version: 2c1988e8c18d14b142c0b472624f71647cf39adb
+  version: 888eb0692c857ec880338addf316bd662d5e630e
   subpackages:
   - proto
 - name: github.com/gonum/blas
@@ -18,18 +18,18 @@ imports:
   subpackages:
   - asm
 - name: github.com/gonum/lapack
-  version: 604f5f0e660b3b46c5041cfd3a243798bb6b51e1
+  version: f031ac4375d5b5dcda3def3f5491e5eaa7141147
   subpackages:
   - lapack64
   - native
 - name: github.com/gonum/matrix
-  version: a4e29827f08e30ac988a5270fff75a598a6d3526
+  version: 7a12dc272d1b0e2523979f093da43cb10ac150d3
   subpackages:
   - mat64
 - name: github.com/nfnt/resize
   version: 891127d8d1b52734debe1b3c3d7e747502b6c366
 - name: github.com/Rompei/exmat
-  version: 1a7edb06fdbc42ac8e6006db0a84d9f9d21f8091
+  version: 2036713c1308e501bc470474806f7d0463cb0f58
 - name: github.com/Rompei/mat
   version: ee581e1692e70696cbbfa2ec4becc49bdf7ea8c1
 testImports: []
