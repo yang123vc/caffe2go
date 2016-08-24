@@ -13,13 +13,17 @@ Command line interface
 Options
 
 ```
-Usage of ./caffe2go:
+age of ./caffe2go:
+-cpuProf string
+Filename for CPU profiling.
 -i string
 Path for image.
 -l string
 Path for labels.
 -m string
 Path for caffemodel.
+-memProf string
+Filename for Memory profiling.
 -mf string
 Meanfile path
 -s uint
@@ -67,6 +71,7 @@ ReLU
 FullyConnected
 Dropout
 Softmax
+LRN
 ```
 
 ## License
