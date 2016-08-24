@@ -19,13 +19,20 @@ func NewDropoutLayer(name, t string, ratio float32) *DropoutLayer {
 // Forward fowards a step.
 func (d *DropoutLayer) Forward(input [][][]float32) ([][][]float32, error) {
 	r := float64(d.Ratio)
+	doneCh := make(chan bool, len(input))
 	for i := range input {
-		t := ConvertMatrix(input[i])
-		var out mat64.Dense
-		out.Apply(func(i, j int, v float64) float64 {
-			return v * r
-		}, t)
-		input[i] = ConvertMat64(&out)
+		go func(idx int) {
+			t := ConvertMatrix(input[idx])
+			var out mat64.Dense
+			out.Apply(func(i, j int, v float64) float64 {
+				return v * r
+			}, t)
+			input[idx] = ConvertMat64(&out)
+			doneCh <- true
+		}(i)
+	}
+	for range input {
+		<-doneCh
 	}
 	return input, nil
 }
