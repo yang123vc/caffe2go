@@ -1,6 +1,7 @@
 package layers
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/gonum/matrix/mat64"
@@ -10,13 +11,13 @@ import (
 type LRN struct {
 	*BaseLayer
 	N     int
-	K     int
+	K     float64
 	Alpha float64
 	Beta  float64
 }
 
 // NewLRNLayer is constructor.
-func NewLRNLayer(name, t string, n, k int, alpha, beta float64) *LRN {
+func NewLRNLayer(name, t string, n int, k, alpha, beta float64) *LRN {
 	return &LRN{
 		BaseLayer: NewBaseLayer(name, t),
 		N:         n,
@@ -27,7 +28,7 @@ func NewLRNLayer(name, t string, n, k int, alpha, beta float64) *LRN {
 }
 
 // Forward forwards one step of the network.
-func (lrn *LRN) Forward(input [][][]float32) [][][]float32 {
+func (lrn *LRN) Forward(input [][][]float32) ([][][]float32, error) {
 	output := make([][][]float32, len(input))
 	for k := range input {
 		s := int(math.Max(0.0, float64(k-lrn.N/2)))
@@ -43,5 +44,6 @@ func (lrn *LRN) Forward(input [][][]float32) [][][]float32 {
 		}, o)
 		output[k] = ConvertMat64(&res)
 	}
-	return output
+	fmt.Println(len(output), len(output[0]), len(output[0][0]))
+	return output, nil
 }
