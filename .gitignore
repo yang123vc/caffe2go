@@ -37,3 +37,4 @@ run.sh
 vendor
 example/example
 *.pprof
+dist
