@@ -1,6 +1,7 @@
 package layers
 
 import (
+	"github.com/Rompei/exmat"
 	"github.com/Rompei/mat"
 	"github.com/gonum/matrix/mat64"
 )
@@ -48,13 +49,16 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 		doneCh := make(chan bool, len(input))
 		for i := range input {
 			go func(i int, doneCh chan bool) {
-				input[i] = mat.NewMatrix(input[i]).Pad(uint(conv.Padding), mat.Max).M
+				in := ConvertMatrix(input[i])
+				inExMat := exmat.NewExMatFromDense(in)
+				input[i] = ConvertMat64(inExMat.ZeroPadding(conv.Padding))
 				doneCh <- true
 			}(i, doneCh)
 		}
 		for i := 0; i < len(input); i++ {
 			<-doneCh
 		}
+		close(doneCh)
 	}
 	in := ConvertMatrix(Im2Col(input, conv.KernelSize, conv.Stride))
 	kernels := make([][]float32, conv.NOutput)
@@ -68,6 +72,7 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 	for i := 0; i < int(conv.NOutput); i++ {
 		<-doneCh
 	}
+	close(doneCh)
 	kernelMatrix := ConvertMatrix(kernels)
 	var out mat64.Dense
 	out.Mul(in, kernelMatrix.T())
@@ -98,11 +103,25 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 			return nil, err
 		}
 	}
+	close(errCh)
 
 	if conv.BiasTerm {
+		doneCh := make(chan bool, len(output))
 		for i := range output {
-			output[i] = mat.NewMatrix(output[i]).BroadcastAdd(conv.Bias[i]).M
+			go func(idx int) {
+				m := ConvertMatrix(output[idx])
+				var res mat64.Dense
+				res.Apply(func(i, j int, v float64) float64 {
+					return v + float64(conv.Bias[idx])
+				}, m)
+				output[idx] = ConvertMat64(&res)
+				doneCh <- true
+			}(i)
 		}
+		for range output {
+			<-doneCh
+		}
+		close(doneCh)
 	}
 
 	return output, nil

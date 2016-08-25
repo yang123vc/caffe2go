@@ -34,5 +34,6 @@ func (d *DropoutLayer) Forward(input [][][]float32) ([][][]float32, error) {
 	for range input {
 		<-doneCh
 	}
+	close(doneCh)
 	return input, nil
 }

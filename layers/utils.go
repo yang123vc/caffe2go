@@ -12,7 +12,7 @@ func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {
 	doneCh := make(chan bool, rows*cols)
 	for y := 0; y < rows; y++ {
 		for x := 0; x < cols; x++ {
-			go func(x, y, idx1 int, doneCh chan bool) {
+			go func(x, y, idx1 int) {
 				col := make([]float32, colSize)
 				idx2 := 0
 				sy := y * stride
@@ -27,13 +27,14 @@ func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {
 				}
 				res[idx1] = col
 				doneCh <- true
-			}(x, y, idx1, doneCh)
+			}(x, y, idx1)
 			idx1++
 		}
 	}
 	for i := 0; i < rows*cols; i++ {
 		<-doneCh
 	}
+	close(doneCh)
 	return res
 }
 
