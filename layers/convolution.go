@@ -1,6 +1,7 @@
 package layers
 
 import (
+	"github.com/Rompei/exmat"
 	"github.com/Rompei/mat"
 	"github.com/gonum/matrix/mat64"
 )
@@ -48,7 +49,9 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 		doneCh := make(chan bool, len(input))
 		for i := range input {
 			go func(i int, doneCh chan bool) {
-				input[i] = mat.NewMatrix(input[i]).Pad(uint(conv.Padding), mat.Max).M
+				in := ConvertMatrix(input[i])
+				inExMat := exmat.NewExMatFromDense(in)
+				input[i] = ConvertMat64(inExMat.ZeroPadding(conv.Padding))
 				doneCh <- true
 			}(i, doneCh)
 		}
@@ -100,8 +103,20 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 	}
 
 	if conv.BiasTerm {
+		doneCh := make(chan bool, len(output))
 		for i := range output {
-			output[i] = mat.NewMatrix(output[i]).BroadcastAdd(conv.Bias[i]).M
+			go func(idx int) {
+				m := ConvertMatrix(output[idx])
+				var res mat64.Dense
+				res.Apply(func(i, j int, v float64) float64 {
+					return v * float64(conv.Bias[idx])
+				}, m)
+				output[idx] = ConvertMat64(&res)
+				doneCh <- true
+			}(i)
+		}
+		for range output {
+			<-doneCh
 		}
 	}
 
