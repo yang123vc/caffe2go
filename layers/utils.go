@@ -34,6 +34,7 @@ func Im2Col(img [][][]float32, kernelSize, stride int) [][]float32 {
 	for i := 0; i < rows*cols; i++ {
 		<-doneCh
 	}
+	close(doneCh)
 	return res
 }
 
