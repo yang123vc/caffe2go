@@ -109,7 +109,7 @@ func (conv *ConvolutionLayer) Forward(input [][][]float32) ([][][]float32, error
 				m := ConvertMatrix(output[idx])
 				var res mat64.Dense
 				res.Apply(func(i, j int, v float64) float64 {
-					return v * float64(conv.Bias[idx])
+					return v + float64(conv.Bias[idx])
 				}, m)
 				output[idx] = ConvertMat64(&res)
 				doneCh <- true
